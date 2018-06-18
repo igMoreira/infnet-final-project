@@ -62,7 +62,9 @@ void setup()
 
   // Start the service
   pService->start();
-  
+
+  // Adds SERVICE UUID to the advertising data
+  pServer->getAdvertising()->addServiceUUID(SERVICE_UUID);
   // Start advertising
   pServer->getAdvertising()->start();
 }
