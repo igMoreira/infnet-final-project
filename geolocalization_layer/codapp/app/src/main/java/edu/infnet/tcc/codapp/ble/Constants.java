@@ -4,10 +4,11 @@ import java.util.HashMap;
 
 public class Constants {
 
-    public static final int SCAN_PERIOD = 15 * 1000;//10000;
+    public static final int SCAN_PERIOD = 15 * 1000;//10000
 
     public static final int REQUEST_BLUETOOTH_ENABLE_CODE = 101;
     public static final int REQUEST_LOCATION_ENABLE_CODE = 101;
+    public static final int REQUEST_GPS_ENABLE_CODE = 10;
 
     public static class GattAttributes {
 //        public static final String CO_DETECTION_SERVICE_UUID = "0000180f-0000-1000-8000-00805f9b34fb";

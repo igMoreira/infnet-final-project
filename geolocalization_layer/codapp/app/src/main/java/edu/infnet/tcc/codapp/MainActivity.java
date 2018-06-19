@@ -17,10 +17,14 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.ParcelUuid;
+import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -38,6 +42,7 @@ import java.util.List;
 import edu.infnet.tcc.codapp.ble.BLEService;
 import edu.infnet.tcc.codapp.ble.Constants;
 import edu.infnet.tcc.codapp.ble.Utils;
+import edu.infnet.tcc.codapp.model.CarbonMonoxideData;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -61,6 +66,10 @@ public class MainActivity extends AppCompatActivity {
     private BluetoothGattCharacteristic mNotifyCharacteristic;
     private boolean mConnected = false;
     private BLEService mBLEService;
+
+    private LocationManager locationManager;
+    public static Location currentLocation;
+
     private final ServiceConnection mServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName componentName, IBinder service) {
@@ -78,7 +87,6 @@ public class MainActivity extends AppCompatActivity {
             mBLEService = null;
         }
     };
-
 
     private void BindView() {
         setContentView(R.layout.activity_main);
@@ -99,6 +107,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         BindView();
+        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+
         mBluetoothAdapter = Utils.getBluetoothAdapter(MainActivity.this);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -157,7 +167,11 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, "ACTION_GATT_SERVICES_DISCOVERED Broadcast received...");
                 displayGattServices(mBLEService.getSupportedGattServices());
             } else if (BLEService.ACTION_DATA_AVAILABLE.equals(action)) {
-                displayData(intent.getStringExtra(BLEService.EXTRA_DATA));
+                String gasConcentration = intent.getStringExtra(BLEService.EXTRA_DATA);
+                displayData(gasConcentration);
+                CarbonMonoxideData coData = new CarbonMonoxideData(gasConcentration, currentLocation);
+                Log.i(TAG, coData.toString());
+                //TODO: send to data analytics service
             }
         }
     };
@@ -227,6 +241,8 @@ public class MainActivity extends AppCompatActivity {
                     Constants.REQUEST_BLUETOOTH_ENABLE_CODE);
         }
 
+        startGpsListener();
+
         if (!getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
             Toast.makeText(this, "Your devices that don't support BLE", Toast.LENGTH_LONG).show();
             finish();
@@ -246,6 +262,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         unregisterReceiver(mGattUpdateReceiver);
+        locationManager.removeUpdates(locationListener);
     }
 
     @Override
@@ -341,5 +358,40 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
+    }
+
+
+    private LocationListener locationListener = new LocationListener() {
+        @Override
+        public void onLocationChanged(Location location) {
+            Log.d(TAG, "onLocationChanged: LOCATION HAS CHANGED!!!!!!!!!!!!!!!!!!!!!");
+            currentLocation = location;
+        }
+
+        @Override
+        public void onStatusChanged(String s, int i, Bundle bundle) {
+
+        }
+
+        @Override
+        public void onProviderEnabled(String s) {
+
+        }
+
+        @Override
+        public void onProviderDisabled(String s) {
+            startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
+        }
+    };
+
+
+    private void startGpsListener() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
+                    Constants.REQUEST_GPS_ENABLE_CODE);
+        }
+        Log.d(TAG, "startGpsListener: I was here!!!");
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+        locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
     }
 }
