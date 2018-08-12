@@ -1,23 +1,78 @@
 package edu.infnet.tcc.codapp.model;
 
 import android.location.Location;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
+
+
+import com.google.gson.annotations.SerializedName;
+
+import java.time.Instant;
+
 
 public class CarbonMonoxideData {
-    private Float ppm;
-    private Location location;
 
-    public CarbonMonoxideData(String gasConcentration, Location currentLocation) {
+    @SerializedName("node")
+    private String node;
+
+    @SerializedName("co")
+    private Float ppm;
+
+    @SerializedName("long")
+    private Double longitude;
+
+    @SerializedName("lat")
+    private Double latitude;
+
+    @SerializedName("mat")
+    private Long measuredAt;
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public CarbonMonoxideData(String node, String gasConcentration, Location currentLocation) {
+        this.node = node;
         this.ppm = Float.valueOf(gasConcentration);
-        this.location = currentLocation;
+        this.longitude = currentLocation.getLongitude();
+        this.latitude = currentLocation.getLatitude();
+        this.measuredAt = Instant.now().toEpochMilli();
     }
 
+    public String getNode() {
+        return node;
+    }
 
-    @Override
-    public String toString() {
-        return "CarbonMonoxideData{" +
-                "ppm=" + ppm +
-                ", altitude=" + (location != null ? location.getAltitude() : "0") +
-                ", longitude=" + (location != null ? location.getLongitude() : "0") +
-                '}';
+    public void setNode(String node) {
+        this.node = node;
+    }
+
+    public Float getPpm() {
+        return ppm;
+    }
+
+    public void setPpm(Float ppm) {
+        this.ppm = ppm;
+    }
+
+    public Double getLongitude() {
+        return longitude;
+    }
+
+    public void setLongitude(Double longitude) {
+        this.longitude = longitude;
+    }
+
+    public Double getLatitude() {
+        return latitude;
+    }
+
+    public void setLatitude(Double latitude) {
+        this.latitude = latitude;
+    }
+
+    public Long getMeasuredAt() {
+        return measuredAt;
+    }
+
+    public void setMeasuredAt(Long measuredAt) {
+        this.measuredAt = measuredAt;
     }
 }

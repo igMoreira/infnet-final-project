@@ -42,6 +42,7 @@ import java.util.List;
 import edu.infnet.tcc.codapp.ble.BLEService;
 import edu.infnet.tcc.codapp.ble.Constants;
 import edu.infnet.tcc.codapp.ble.Utils;
+import edu.infnet.tcc.codapp.integration.PersistenceLayer;
 import edu.infnet.tcc.codapp.model.CarbonMonoxideData;
 
 public class MainActivity extends AppCompatActivity {
@@ -143,6 +144,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+
     }
 
     // Handles various events fired by the Service.
@@ -169,9 +171,12 @@ public class MainActivity extends AppCompatActivity {
             } else if (BLEService.ACTION_DATA_AVAILABLE.equals(action)) {
                 String gasConcentration = intent.getStringExtra(BLEService.EXTRA_DATA);
                 displayData(gasConcentration);
-                CarbonMonoxideData coData = new CarbonMonoxideData(gasConcentration, currentLocation);
+                CarbonMonoxideData coData = null;
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                    coData = new CarbonMonoxideData(Constants.GattAttributes.CO_DETECTION_SERVICE_UUID , gasConcentration, currentLocation);
+                }
                 Log.i(TAG, coData.toString());
-                //TODO: send to data analytics service
+                sendToPersistenceLayer(coData);
             }
         }
     };
@@ -393,5 +398,9 @@ public class MainActivity extends AppCompatActivity {
         Log.d(TAG, "startGpsListener: I was here!!!");
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
         locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
+    }
+
+    private void sendToPersistenceLayer(CarbonMonoxideData data){
+        new PersistenceLayer("https://4a5nqxjqg3.execute-api.sa-east-1.amazonaws.com/PROD/co", this).execute(data);
     }
 }
