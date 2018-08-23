@@ -7,6 +7,7 @@ import android.support.annotation.RequiresApi;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.lang.reflect.Field;
 import java.time.Instant;
 
 
@@ -74,5 +75,18 @@ public class CarbonMonoxideData {
 
     public void setMeasuredAt(Long measuredAt) {
         this.measuredAt = measuredAt;
+    }
+
+    public boolean isNull() {
+        for (Field f : getClass().getDeclaredFields()) {
+            try {
+                if (f.get(this) == null)
+                    return true;
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+                return true;
+            }
+        }
+        return false;
     }
 }

@@ -176,7 +176,8 @@ public class MainActivity extends AppCompatActivity {
                     coData = new CarbonMonoxideData(Constants.GattAttributes.CO_DETECTION_SERVICE_UUID , gasConcentration, currentLocation);
                 }
                 Log.i(TAG, coData.toString());
-                sendToPersistenceLayer(coData);
+                if(!coData.isNull())
+                    sendToPersistenceLayer(coData);
             }
         }
     };
