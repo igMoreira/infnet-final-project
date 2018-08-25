@@ -32,8 +32,8 @@ public class CarbonMonoxideData {
     public CarbonMonoxideData(String node, String gasConcentration, Location currentLocation) {
         this.node = node;
         this.ppm = Float.valueOf(gasConcentration);
-        this.longitude = currentLocation.getLongitude();
-        this.latitude = currentLocation.getLatitude();
+        this.longitude = (currentLocation != null) ? currentLocation.getLongitude() : .0;
+        this.latitude = (currentLocation != null) ? currentLocation.getLatitude() : .0;
         this.measuredAt = Instant.now().toEpochMilli();
     }
 
@@ -75,18 +75,5 @@ public class CarbonMonoxideData {
 
     public void setMeasuredAt(Long measuredAt) {
         this.measuredAt = measuredAt;
-    }
-
-    public boolean isNull() {
-        for (Field f : getClass().getDeclaredFields()) {
-            try {
-                if (f.get(this) == null)
-                    return true;
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-                return true;
-            }
-        }
-        return false;
     }
 }

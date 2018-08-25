@@ -1,3 +1,5 @@
+#include <SimpleKalmanFilter.h>
+
 #include <BLEDevice.h>
 #include <BLEServer.h>
 #include <BLEUtils.h>
@@ -14,6 +16,9 @@ BLECharacteristic *pCharacteristic = NULL;
 float txValue = 0;
 bool deviceConnected = false;
 bool oldDeviceConnected = false;
+
+SimpleKalmanFilter kFilt(80, 80, 0.11);
+
 
 class MyServerCallbacks : public BLEServerCallbacks
 {
@@ -92,9 +97,10 @@ void loop()
 
 float acquire_data()
 {
-  int sensorValue = analogRead(SENSOR_PIN);
-
-  float sensor_voltage = sensorValue * (5.0 / 4095.0 /*1024.0*/);
+  float sensorValue = analogRead(SENSOR_PIN);
+  sensorValue = kFilt.updateEstimate(sensorValue);
+  
+  float sensor_voltage = sensorValue * (5.0 / 4095.0);
   float RS_gas = (5.0 - sensor_voltage) / sensor_voltage;
   float ppm = (19.32 * pow(RS_gas, -0.64));
 

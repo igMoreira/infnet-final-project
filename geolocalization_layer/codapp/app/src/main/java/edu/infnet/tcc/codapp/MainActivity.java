@@ -91,7 +91,6 @@ public class MainActivity extends AppCompatActivity {
 
     private void BindView() {
         setContentView(R.layout.activity_main);
-//        ButterKnife.bind(this);
 
         button = findViewById(R.id.startScan);
         connectDevice = findViewById(R.id.connectDevice);
@@ -175,9 +174,7 @@ public class MainActivity extends AppCompatActivity {
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
                     coData = new CarbonMonoxideData(Constants.GattAttributes.CO_DETECTION_SERVICE_UUID , gasConcentration, currentLocation);
                 }
-                Log.i(TAG, coData.toString());
-                if(!coData.isNull())
-                    sendToPersistenceLayer(coData);
+                sendToPersistenceLayer(coData);
             }
         }
     };
@@ -187,7 +184,6 @@ public class MainActivity extends AppCompatActivity {
         public void onScanResult(int callbackType, ScanResult result) {
             super.onScanResult(callbackType, result);
             if (result != null) {
-//                Log.d(TAG, "Device: " + result.toString());
                 if (result.getDevice() != null && result.getDevice().getName() != null) {
                     BluetoothDevice d = result.getDevice();
                     Log.d(TAG, "Name: " + (d.getName() != null && !d.getName().isEmpty() ? d.getName() : "<no name>"));
@@ -370,7 +366,6 @@ public class MainActivity extends AppCompatActivity {
     private LocationListener locationListener = new LocationListener() {
         @Override
         public void onLocationChanged(Location location) {
-            Log.d(TAG, "onLocationChanged: LOCATION HAS CHANGED!!!!!!!!!!!!!!!!!!!!!");
             currentLocation = location;
         }
 
@@ -396,7 +391,6 @@ public class MainActivity extends AppCompatActivity {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION},
                     Constants.REQUEST_GPS_ENABLE_CODE);
         }
-        Log.d(TAG, "startGpsListener: I was here!!!");
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
         locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListener);
     }
